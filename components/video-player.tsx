@@ -32,15 +32,24 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
     const video = videoRef.current
     if (!video || youtubeId) return
 
-    const updateTime = () => {
-      setCurrentTime(video.currentTime)
+    const handleTimeUpdate = () => {
+      if (!seeking) {
+        setCurrentTime(video.currentTime)
+      }
     }
 
-    video.addEventListener('timeupdate', updateTime)
+    video.addEventListener('timeupdate', handleTimeUpdate)
+    video.addEventListener('play', handleTimeUpdate)
+    video.addEventListener('seeking', handleTimeUpdate)
+    video.addEventListener('seeked', handleTimeUpdate)
+
     return () => {
-      video.removeEventListener('timeupdate', updateTime)
+      video.removeEventListener('timeupdate', handleTimeUpdate)
+      video.removeEventListener('play', handleTimeUpdate)
+      video.removeEventListener('seeking', handleTimeUpdate)
+      video.removeEventListener('seeked', handleTimeUpdate)
     }
-  }, [youtubeId])
+  }, [youtubeId, seeking])
 
   useEffect(() => {
     const video = videoRef.current
@@ -322,6 +331,20 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
       setCurrentQuality(quality)
     }
   }
+
+  // Add a manual time update interval as a fallback
+  useEffect(() => {
+    if (youtubeId || !videoRef.current || !isPlaying) return
+    
+    // Create an interval to update the time regularly
+    const interval = setInterval(() => {
+      if (videoRef.current && !seeking) {
+        setCurrentTime(videoRef.current.currentTime)
+      }
+    }, 250)
+    
+    return () => clearInterval(interval)
+  }, [youtubeId, isPlaying, seeking])
 
   return (
     <Card className="w-full">
