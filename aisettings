@@ -1,0 +1,40 @@
+// AI Settings for WSL Games Analysis Application
+
+// Server-side image processing configuration
+export const serverConfig = {
+  // Enable server-side image processing and storage
+  enableServerSideProcessing: true,
+  
+  // Base directory for storing captured frames
+  baseStorageDirectory: "./public/captures",
+  
+  // Image format settings
+  imageFormat: {
+    type: "png",
+    quality: 0.9
+  },
+  
+  // Maximum file size in MB
+  maxFileSize: 10,
+  
+  // Auto-cleanup settings
+  cleanup: {
+    enabled: false,
+    maxAge: 30, // days
+    maxFiles: 1000
+  }
+};
+
+// API endpoints for server communication
+export const apiEndpoints = {
+  saveFrame: "/api/save-frame",
+  getFrames: "/api/get-frames",
+  deleteFrame: "/api/delete-frame"
+};
+
+// Client-side fallback options when server processing is unavailable
+export const clientFallbackOptions = {
+  enableDownload: true,
+  enableLocalStorage: false,
+  maxLocalStorageItems: 20
+};
