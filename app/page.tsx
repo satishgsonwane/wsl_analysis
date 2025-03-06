@@ -6,6 +6,13 @@ import AnalysisPanel from "@/components/analysis-panel"
 import { toast } from "@/components/ui/use-toast"
 import { ToastProvider } from "@/components/ui/toast"
 
+// Add this type declaration at the top of your file
+declare global {
+  interface Window {
+    showDirectoryPicker: (options?: any) => Promise<FileSystemDirectoryHandle>;
+  }
+}
+
 export default function Home() {
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null)
   const [lastCapturePath, setLastCapturePath] = useState<string | null>(null)
@@ -183,7 +190,7 @@ export default function Home() {
     <ToastProvider>
       <main className="flex min-h-screen flex-col md:flex-row p-4 gap-4">
         <div className="w-full md:w-2/3">
-          <VideoPlayer onCaptureFrame={() => {}} />
+          <VideoPlayer onCaptureFrame={(frameDataUrl) => setCapturedFrame(frameDataUrl)} />
         </div>
         <div className="w-full md:w-1/3">
           <AnalysisPanel
