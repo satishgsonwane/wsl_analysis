@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Trash2 } from "lucide-react"
+import { Trash2, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // Add this type declaration at the top of your file
@@ -232,6 +232,30 @@ export default function Home() {
     }
   };
 
+  const downloadCapturesAsZip = async () => {
+    try {
+      // Trigger file download by creating a link and clicking it
+      const link = document.createElement("a");
+      link.href = "/api/download-captures";
+      link.download = `captures_${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download started",
+        description: "Your captures are being downloaded as a zip file.",
+      });
+    } catch (error) {
+      console.error("Error downloading captures:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download captures",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <ToastProvider>
       <main className="flex min-h-screen flex-col p-4 gap-4">
@@ -244,29 +268,59 @@ export default function Home() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Analysis Tools</h2>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" className="flex items-center gap-1">
-                      <Trash2 className="h-4 w-4" />
-                      Clear All Captures
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action will permanently delete all captured frames from the server.
-                        This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={clearCapturesFolder}>
-                        Yes, delete everything
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <div className="flex space-x-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download All
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Download All Captures</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will download all captured frames as a zip file. 
+                          Depending on the number of captures, this may take a moment.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={downloadCapturesAsZip}>
+                          Download
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="flex items-center gap-1">
+                        <Trash2 className="h-4 w-4" />
+                        Clear All
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action will permanently delete all captured frames from the server.
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={clearCapturesFolder}>
+                          Yes, delete everything
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
               
               <AnalysisPanel

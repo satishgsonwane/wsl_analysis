@@ -35,16 +35,16 @@ export default function AnalysisPanel({
     "Dribble",
     "Goal",
     "Corner_kick",
-    "Free_or_Pen_Kick",
+    "Free_Pen_Kick",
     "Throw_in",
     "Foul",
-    "Card_Yellow_Red",
+    "Card",
     "Offside",
-    "Player_Substi",
-    "Injury_Incident",
-    "Coach_Reaction",
-    "Crowd_Reaction",
-    "Event_15",
+    "Substitution",
+    "Injury",
+    "Coach_React",
+    "Crowd_React",
+    "Celebration",
     "Event_16"
   ]
 
