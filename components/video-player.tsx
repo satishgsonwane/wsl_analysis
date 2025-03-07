@@ -20,7 +20,8 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
   const [seeking, setSeeking] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [notes, setNotes] = useState<string>("")
+  const [notes, setNotes] = useState<string[]>([""])
+  const [currentNoteIndex, setCurrentNoteIndex] = useState(0)
 
   useEffect(() => {
     const video = videoRef.current
@@ -120,7 +121,7 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
         const frameDataUrl = canvas.toDataURL("image/png")
         
         // Save notes if there are any
-        if (notes.trim()) {
+        if (notes.some(note => note.trim() !== "")) {
           saveNotes();
         }
         
@@ -164,12 +165,36 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
-  const handleNotesChange = (value: string) => {
-    setNotes(value);
+  const handleNotesChange = (value: string, index: number) => {
+    const updatedNotes = [...notes];
+    updatedNotes[index] = value;
+    setNotes(updatedNotes);
+  }
+  
+  const addNewNote = () => {
+    setNotes([...notes, ""]);
+    setCurrentNoteIndex(notes.length);
+  }
+  
+  const removeNote = (index: number) => {
+    if (notes.length <= 1) return; // Always keep at least one note
+    
+    const updatedNotes = notes.filter((_, i) => i !== index);
+    setNotes(updatedNotes);
+    
+    // Adjust current note index if needed
+    if (currentNoteIndex >= updatedNotes.length) {
+      setCurrentNoteIndex(updatedNotes.length - 1);
+    } else if (currentNoteIndex > index) {
+      setCurrentNoteIndex(currentNoteIndex - 1);
+    }
   }
   
   const saveNotes = async () => {
-    if (!notes.trim()) return;
+    // Filter out empty notes
+    const notesToSave = notes.filter(note => note.trim() !== "");
+    
+    if (notesToSave.length === 0) return;
     
     try {
       const response = await fetch('/api/save-notes', {
@@ -177,12 +202,13 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notes }),
+        body: JSON.stringify({ notes: notesToSave.join('\n') }),
       });
       
       if (response.ok) {
-        // Clear the notes field after successful save
-        setNotes("");
+        // Clear the notes after successful save
+        setNotes([""]);
+        setCurrentNoteIndex(0);
         console.log("Notes saved successfully");
       } else {
         console.error("Failed to save notes");
@@ -191,6 +217,21 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
       console.error("Error saving notes:", error);
     }
   }
+
+  // Add this effect to listen for the clearNotes event
+  useEffect(() => {
+    const handleClearNotes = () => {
+      setNotes([""]);
+      setCurrentNoteIndex(0);
+      console.log("Notes cleared from event");
+    };
+    
+    document.addEventListener('clearNotes', handleClearNotes);
+    
+    return () => {
+      document.removeEventListener('clearNotes', handleClearNotes);
+    };
+  }, []);
 
   return (
     <>
@@ -323,14 +364,40 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
             </div>
             
             <div className="flex flex-col h-full">
-              <h3 className="text-sm font-medium mb-2">Notes</h3>
-              <div className="relative bg-muted rounded-md overflow-hidden flex-grow p-2">
-                <textarea 
-                  className="w-full h-full min-h-[150px] p-2 bg-background border rounded-md"
-                  placeholder="Add notes about this capture (saved automatically when capturing frame)..."
-                  onChange={(e) => handleNotesChange(e.target.value)}
-                  value={notes}
-                />
+              <h3 className="text-sm font-medium mb-2">Notes Checklist</h3>
+              <div className="relative bg-muted rounded-md overflow-hidden flex-grow p-2 notes-checklist">
+                <div className="space-y-2 max-h-[250px] overflow-y-auto p-2">
+                  {notes.map((note, index) => (
+                    <div key={index} className="flex items-start gap-2 bg-background p-2 rounded-md border">
+                      <div className="flex-grow">
+                        <textarea
+                          className="w-full min-h-[60px] p-2 bg-background border-0 focus:ring-0 resize-none"
+                          placeholder={`Note ${index + 1} (saved with capture)`}
+                          value={note}
+                          onChange={(e) => handleNotesChange(e.target.value, index)}
+                        />
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                        onClick={() => removeNote(index)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addNewNote}
+                    className="text-xs"
+                  >
+                    + Add Note
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

@@ -121,19 +121,39 @@ export default function Home() {
       const frameDataUrl = canvas.toDataURL("image/png")
       setCapturedFrame(frameDataUrl)
 
-      // Get notes from the VideoPlayer component
-      const notes = document.querySelector('textarea')?.value || '';
+      // Get notes from all textareas in the notes section
+      const noteTextareas = document.querySelectorAll('.notes-checklist textarea');
+      console.log("Found note textareas:", noteTextareas.length); // Debug log
+
+      const notesArray: string[] = [];
+
+      noteTextareas.forEach(textarea => {
+        const value = (textarea as HTMLTextAreaElement).value.trim();
+        console.log("Textarea value:", value); // Debug log
+        if (value) {
+          notesArray.push(value);
+        }
+      });
       
       // Save notes if there are any
-      if (notes.trim()) {
+      if (notesArray.length > 0) {
+        console.log("Saving notes:", notesArray); // Debug log
         try {
-          await fetch('/api/save-notes', {
+          const response = await fetch('/api/save-notes', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ notes }),
+            body: JSON.stringify({ notes: notesArray.join('\n') }),
           });
+          
+          const result = await response.json();
+          console.log("Save notes response:", result); // Debug log
+          
+          // Instead of directly manipulating the DOM, dispatch a custom event
+          // that the VideoPlayer component can listen for
+          const clearNotesEvent = new CustomEvent('clearNotes');
+          document.dispatchEvent(clearNotesEvent);
         } catch (error) {
           console.error("Error saving notes:", error);
         }
