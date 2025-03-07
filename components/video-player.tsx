@@ -20,6 +20,7 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
   const [seeking, setSeeking] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [notes, setNotes] = useState<string>("")
 
   useEffect(() => {
     const video = videoRef.current
@@ -156,6 +157,35 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
+  const handleNotesChange = (value: string) => {
+    setNotes(value);
+  }
+  
+  const saveNotes = async () => {
+    if (!notes.trim()) return;
+    
+    try {
+      const response = await fetch('/api/save-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notes }),
+      });
+      
+      if (response.ok) {
+        // Clear the notes field after successful save
+        setNotes("");
+        // Show success message (you could add a toast notification here)
+        console.log("Notes saved successfully");
+      } else {
+        console.error("Failed to save notes");
+      }
+    } catch (error) {
+      console.error("Error saving notes:", error);
+    }
+  }
+
   return (
     <>
       <Card className="w-full">
@@ -276,17 +306,6 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col h-full">
-              <h3 className="text-sm font-medium mb-2">Camera Positions</h3>
-              <div className="relative bg-muted rounded-md overflow-hidden flex-grow">
-                <img
-                  src="/field.png"
-                  alt="Camera positions on field"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-            
-            <div className="flex flex-col h-full">
               <h3 className="text-sm font-medium mb-2">Framing Options</h3>
               <div className="relative bg-muted rounded-md overflow-hidden flex-grow">
                 <img
@@ -294,6 +313,27 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
                   alt="Framing reference options"
                   className="w-full h-full object-contain"
                 />
+              </div>
+            </div>
+            
+            <div className="flex flex-col h-full">
+              <h3 className="text-sm font-medium mb-2">Notes</h3>
+              <div className="relative bg-muted rounded-md overflow-hidden flex-grow p-2">
+                <textarea 
+                  className="w-full h-full min-h-[150px] p-2 bg-background border rounded-md"
+                  placeholder="Add notes about this capture..."
+                  onChange={(e) => handleNotesChange(e.target.value)}
+                  value={notes}
+                />
+                <div className="flex justify-end mt-2">
+                  <Button 
+                    size="sm" 
+                    onClick={saveNotes}
+                    className="text-xs"
+                  >
+                    Save Notes
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
