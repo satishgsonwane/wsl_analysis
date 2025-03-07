@@ -118,6 +118,13 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
 
         // Convert canvas to data URL and store it
         const frameDataUrl = canvas.toDataURL("image/png")
+        
+        // Save notes if there are any
+        if (notes.trim()) {
+          saveNotes();
+        }
+        
+        // Pass the frame data to the parent component
         onCaptureFrame(frameDataUrl)
       }
     }
@@ -176,7 +183,6 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
       if (response.ok) {
         // Clear the notes field after successful save
         setNotes("");
-        // Show success message (you could add a toast notification here)
         console.log("Notes saved successfully");
       } else {
         console.error("Failed to save notes");
@@ -321,19 +327,10 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
               <div className="relative bg-muted rounded-md overflow-hidden flex-grow p-2">
                 <textarea 
                   className="w-full h-full min-h-[150px] p-2 bg-background border rounded-md"
-                  placeholder="Add notes about this capture..."
+                  placeholder="Add notes about this capture (saved automatically when capturing frame)..."
                   onChange={(e) => handleNotesChange(e.target.value)}
                   value={notes}
                 />
-                <div className="flex justify-end mt-2">
-                  <Button 
-                    size="sm" 
-                    onClick={saveNotes}
-                    className="text-xs"
-                  >
-                    Save Notes
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

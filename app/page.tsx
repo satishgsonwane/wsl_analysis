@@ -121,6 +121,24 @@ export default function Home() {
       const frameDataUrl = canvas.toDataURL("image/png")
       setCapturedFrame(frameDataUrl)
 
+      // Get notes from the VideoPlayer component
+      const notes = document.querySelector('textarea')?.value || '';
+      
+      // Save notes if there are any
+      if (notes.trim()) {
+        try {
+          await fetch('/api/save-notes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notes }),
+          });
+        } catch (error) {
+          console.error("Error saving notes:", error);
+        }
+      }
+
       // Try to save the file to the server
       try {
         // Convert data URL to Blob
