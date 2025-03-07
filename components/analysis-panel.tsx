@@ -26,7 +26,7 @@ export default function AnalysisPanel({
   const [lastCaptured, setLastCaptured] = useState<{ camera: string; event: string; framing: string } | null>(null)
 
   // Generate camera buttons - 6 cameras in a 2x3 grid
-  const cameraButtons = Array.from({ length: 6 }, (_, i) => `Cam_${i + 1}`)
+  const cameraButtons = Array.from({ length: 6 }, (_, i) => `Cam_${i + 1}`).concat(["Cam_X"])
 
   // Custom event buttons with specific labels
   const eventButtons = [
@@ -45,7 +45,11 @@ export default function AnalysisPanel({
     "Coach_React",
     "Crowd_React",
     "Celebration",
-    "Event_16"
+    "Players_React",
+    "Ref_decision",
+    "Goal_save",
+    "Shot_Prep",
+    "Event_20"
   ]
 
   // Custom framing buttons with specific labels - 6 options in a 3x2 grid
