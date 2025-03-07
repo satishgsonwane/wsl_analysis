@@ -6,6 +6,19 @@ import AnalysisPanel from "@/components/analysis-panel"
 import { toast } from "@/components/ui/use-toast"
 import { ToastProvider } from "@/components/ui/toast"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 // Add this type declaration at the top of your file
 declare global {
@@ -187,6 +200,38 @@ export default function Home() {
     }
   }, [capturedFrame])
 
+  const clearCapturesFolder = async () => {
+    try {
+      const response = await fetch("/api/clear-captures", {
+        method: "POST",
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Captures folder cleared successfully",
+        });
+        // Clear the current captured frame if there is one
+        handleClearFrame();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to clear captures folder",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error clearing captures folder:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <ToastProvider>
       <main className="flex min-h-screen flex-col p-4 gap-4">
@@ -196,12 +241,41 @@ export default function Home() {
           </div>
           
           <div className="md:col-span-1">
-            <AnalysisPanel
-              onCaptureFrame={triggerCaptureFrame}
-              capturedFrame={capturedFrame}
-              onClearFrame={handleClearFrame}
-              onDownloadFrame={handleDownloadFrame}
-            />
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Analysis Tools</h2>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="flex items-center gap-1">
+                      <Trash2 className="h-4 w-4" />
+                      Clear All Captures
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action will permanently delete all captured frames from the server.
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={clearCapturesFolder}>
+                        Yes, delete everything
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+              
+              <AnalysisPanel
+                onCaptureFrame={triggerCaptureFrame}
+                capturedFrame={capturedFrame}
+                onClearFrame={handleClearFrame}
+                onDownloadFrame={handleDownloadFrame}
+              />
+            </div>
           </div>
         </div>
       </main>
