@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "WSL Games Analysis",
   description: "Analysis tool for WSL games with video and event tracking",
-    generator: 'v0.dev'
+    generator: 'OZ'
 }
 
 export default function RootLayout({

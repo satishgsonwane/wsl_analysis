@@ -157,115 +157,149 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Video Analysis</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="relative aspect-video bg-muted rounded-md overflow-hidden flex items-center justify-center">
-          {videoSrc ? (
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              className="w-full h-full cursor-pointer"
-              onEnded={() => setIsPlaying(false)}
-              onClick={togglePlay}
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center">
-              <div className="flex flex-col items-center mb-4">
-                <Upload className="h-10 w-10 mb-2" />
-                <label className="cursor-pointer text-center">
-                  <span>Click to upload local video</span>
-                  <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
-                </label>
+    <>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Video Analysis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative aspect-video bg-muted rounded-md overflow-hidden flex items-center justify-center">
+            {videoSrc ? (
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                className="w-full h-full cursor-pointer"
+                onEnded={() => setIsPlaying(false)}
+                onClick={togglePlay}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center mb-4">
+                  <Upload className="h-10 w-10 mb-2" />
+                  <label className="cursor-pointer text-center">
+                    <span>Click to upload local video</span>
+                    <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
+                  </label>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-
-        <canvas ref={canvasRef} className="hidden" />
-
-        {videoSrc && (
-          <>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="icon" onClick={() => seekBackward(5)}>
-                <SkipBack className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={togglePlay}>
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => seekForward(5)}>
-                <SkipForward className="h-4 w-4" />
-              </Button>
-
-              <div className="flex-1 flex items-center space-x-2">
-                <span className="text-sm">Speed:</span>
-                <Slider
-                  value={[playbackRate]}
-                  min={0.25}
-                  max={2}
-                  step={0.25}
-                  onValueChange={handleSpeedChange}
-                  className="w-32"
-                />
-                <span className="text-sm">{playbackRate}x</span>
-              </div>
-
-              <label className="cursor-pointer">
-                <span className="sr-only">Upload video</span>
-                <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
-                <Button variant="outline" size="sm" asChild>
-                  <span>Change Video</span>
-                </Button>
-              </label>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm w-12">{formatTime(currentTime)}</span>
-                <Slider
-                  value={[currentTime]}
-                  min={0}
-                  max={duration || 100}
-                  step={0.1}
-                  onValueChange={handleSeekChange}
-                  onValueCommit={handleSeekCommit}
-                  className="flex-1"
-                />
-                <span className="text-sm w-12">{formatTime(duration)}</span>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Source selection controls */}
-        <div className="flex justify-between items-center">
-          {videoSrc ? (
-            <div className="text-sm">Local video loaded</div>
-          ) : (
-            <div className="text-sm text-muted-foreground">No video loaded</div>
-          )}
-
-          <div className="flex space-x-2">
-            {videoSrc && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setVideoSrc(null)
-                  setIsPlaying(false)
-                  setCurrentTime(0)
-                  setDuration(0)
-                }}
-              >
-                Clear
-              </Button>
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          <canvas ref={canvasRef} className="hidden" />
+
+          {videoSrc && (
+            <>
+              <div className="flex items-center space-x-4">
+                <Button variant="outline" size="icon" onClick={() => seekBackward(5)}>
+                  <SkipBack className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={togglePlay}>
+                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => seekForward(5)}>
+                  <SkipForward className="h-4 w-4" />
+                </Button>
+
+                <div className="flex-1 flex items-center space-x-2">
+                  <span className="text-sm">Speed:</span>
+                  <Slider
+                    value={[playbackRate]}
+                    min={0.25}
+                    max={2}
+                    step={0.25}
+                    onValueChange={handleSpeedChange}
+                    className="w-32"
+                  />
+                  <span className="text-sm">{playbackRate}x</span>
+                </div>
+
+                <label className="cursor-pointer">
+                  <span className="sr-only">Upload video</span>
+                  <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
+                  <Button variant="outline" size="sm" asChild>
+                    <span>Change Video</span>
+                  </Button>
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm w-12">{formatTime(currentTime)}</span>
+                  <Slider
+                    value={[currentTime]}
+                    min={0}
+                    max={duration || 100}
+                    step={0.1}
+                    onValueChange={handleSeekChange}
+                    onValueCommit={handleSeekCommit}
+                    className="flex-1"
+                  />
+                  <span className="text-sm w-12">{formatTime(duration)}</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Source selection controls */}
+          <div className="flex justify-between items-center">
+            {videoSrc ? (
+              <div className="text-sm">Local video loaded</div>
+            ) : (
+              <div className="text-sm text-muted-foreground">No video loaded</div>
+            )}
+
+            <div className="flex space-x-2">
+              {videoSrc && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setVideoSrc(null)
+                    setIsPlaying(false)
+                    setCurrentTime(0)
+                    setDuration(0)
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Reference Images - Optimized Layout */}
+      <Card className="w-full mt-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Reference Images</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col h-full">
+              <h3 className="text-sm font-medium mb-2">Camera Positions</h3>
+              <div className="relative bg-muted rounded-md overflow-hidden flex-grow">
+                <img
+                  src="/field.png"
+                  alt="Camera positions on field"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-col h-full">
+              <h3 className="text-sm font-medium mb-2">Framing Options</h3>
+              <div className="relative bg-muted rounded-md overflow-hidden flex-grow">
+                <img
+                  src="/framing.jpg"
+                  alt="Framing reference options"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </>
   )
 }
 

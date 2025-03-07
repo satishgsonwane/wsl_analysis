@@ -5,6 +5,7 @@ import VideoPlayer from "@/components/video-player"
 import AnalysisPanel from "@/components/analysis-panel"
 import { toast } from "@/components/ui/use-toast"
 import { ToastProvider } from "@/components/ui/toast"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 // Add this type declaration at the top of your file
 declare global {
@@ -188,17 +189,20 @@ export default function Home() {
 
   return (
     <ToastProvider>
-      <main className="flex min-h-screen flex-col md:flex-row p-4 gap-4">
-        <div className="w-full md:w-2/3">
-          <VideoPlayer onCaptureFrame={(frameDataUrl) => setCapturedFrame(frameDataUrl)} />
-        </div>
-        <div className="w-full md:w-1/3">
-          <AnalysisPanel
-            onCaptureFrame={triggerCaptureFrame}
-            capturedFrame={capturedFrame}
-            onClearFrame={handleClearFrame}
-            onDownloadFrame={handleDownloadFrame}
-          />
+      <main className="flex min-h-screen flex-col p-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2 space-y-4">
+            <VideoPlayer onCaptureFrame={(frameDataUrl) => setCapturedFrame(frameDataUrl)} />
+          </div>
+          
+          <div className="md:col-span-1">
+            <AnalysisPanel
+              onCaptureFrame={triggerCaptureFrame}
+              capturedFrame={capturedFrame}
+              onClearFrame={handleClearFrame}
+              onDownloadFrame={handleDownloadFrame}
+            />
+          </div>
         </div>
       </main>
     </ToastProvider>
