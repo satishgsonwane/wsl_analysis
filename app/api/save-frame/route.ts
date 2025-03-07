@@ -24,9 +24,13 @@ export async function POST(request: NextRequest) {
     const folderPath = path.join(baseDir, camera, event, framing);
     await mkdir(folderPath, { recursive: true });
     
-    // Create filename with timestamp
-    const timestamp = new Date().toISOString().replace(/:/g, "-");
-    const fileName = `frame_${timestamp}.png`;
+    // Create filename with path and cleaner timestamp
+    const timestamp = new Date().toISOString()
+      .replace(/:/g, "-")
+      .replace("T", "_")
+      .replace("Z", "");
+    
+    const fileName = `${camera}_${event}_${framing}_${timestamp}.jpg`;
     const filePath = path.join(folderPath, fileName);
     
     // Convert file to buffer and save

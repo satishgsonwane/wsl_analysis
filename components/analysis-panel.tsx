@@ -25,14 +25,38 @@ export default function AnalysisPanel({
   const [selectedFraming, setSelectedFraming] = useState<string | null>(null)
   const [lastCaptured, setLastCaptured] = useState<{ camera: string; event: string; framing: string } | null>(null)
 
-  // Generate camera buttons
-  const cameraButtons = Array.from({ length: 12 }, (_, i) => `Cam ${i + 1}`)
+  // Generate camera buttons - 6 cameras in a 2x3 grid
+  const cameraButtons = Array.from({ length: 6 }, (_, i) => `Cam_${i + 1}`)
 
-  // Generate event buttons
-  const eventButtons = Array.from({ length: 12 }, (_, i) => `Event ${i + 1}`)
+  // Custom event buttons with specific labels
+  const eventButtons = [
+    "Kickoff",
+    "Pass",
+    "Dribble",
+    "Goal",
+    "Corner_kick",
+    "Free_Pen_Kick",
+    "Throw_in",
+    "Foul",
+    "Card",
+    "Offside",
+    "Substitution",
+    "Injury",
+    "Coach_React",
+    "Crowd_React",
+    "Celebration",
+    "Event_16"
+  ]
 
-  // Generate framing buttons
-  const framingButtons = Array.from({ length: 9 }, (_, i) => `Framing ${i + 1}`)
+  // Custom framing buttons with specific labels - 6 options in a 3x2 grid
+  const framingButtons = [
+    "Extreme_Wide",
+    "Wide",
+    "Medium",
+    "Medium_Close",
+    "Close_Up",
+    "Extreme_Close_Up"
+  ]
 
   const handleCaptureClick = () => {
     if (!selectedCamera || !selectedEvent || !selectedFraming) return;
@@ -62,7 +86,7 @@ export default function AnalysisPanel({
         <ButtonGrid
           title="Camera"
           buttons={cameraButtons}
-          columns={4}
+          columns={3}  // Changed to 3 columns for a 2x3 grid
           selectedButton={selectedCamera}
           onButtonClick={(camera) => setSelectedCamera(camera)}
         />
@@ -70,7 +94,7 @@ export default function AnalysisPanel({
         <ButtonGrid
           title="Event"
           buttons={eventButtons}
-          columns={4}
+          columns={4}  // Keep 4 columns for a 4x4 grid
           selectedButton={selectedEvent}
           onButtonClick={(event) => setSelectedEvent(event)}
         />
@@ -78,7 +102,7 @@ export default function AnalysisPanel({
         <ButtonGrid
           title="Framing"
           buttons={framingButtons}
-          columns={3}
+          columns={2}  // Changed to 2 columns for a 3x2 grid
           selectedButton={selectedFraming}
           onButtonClick={(framing) => setSelectedFraming(framing)}
         />

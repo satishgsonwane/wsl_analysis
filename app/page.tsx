@@ -5,6 +5,27 @@ import VideoPlayer from "@/components/video-player"
 import AnalysisPanel from "@/components/analysis-panel"
 import { toast } from "@/components/ui/use-toast"
 import { ToastProvider } from "@/components/ui/toast"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Trash2, Download } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+// Add this type declaration at the top of your file
+declare global {
+  interface Window {
+    showDirectoryPicker: (options?: any) => Promise<FileSystemDirectoryHandle>;
+  }
+}
 
 export default function Home() {
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null)
@@ -179,19 +200,137 @@ export default function Home() {
     }
   }, [capturedFrame])
 
+  const clearCapturesFolder = async () => {
+    try {
+      const response = await fetch("/api/clear-captures", {
+        method: "POST",
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Captures folder cleared successfully",
+        });
+        // Clear the current captured frame if there is one
+        handleClearFrame();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to clear captures folder",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error clearing captures folder:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadCapturesAsZip = async () => {
+    try {
+      // Trigger file download by creating a link and clicking it
+      const link = document.createElement("a");
+      link.href = "/api/download-captures";
+      link.download = `captures_${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download started",
+        description: "Your captures are being downloaded as a zip file.",
+      });
+    } catch (error) {
+      console.error("Error downloading captures:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download captures",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <ToastProvider>
-      <main className="flex min-h-screen flex-col md:flex-row p-4 gap-4">
-        <div className="w-full md:w-2/3">
-          <VideoPlayer onCaptureFrame={() => {}} />
-        </div>
-        <div className="w-full md:w-1/3">
-          <AnalysisPanel
-            onCaptureFrame={triggerCaptureFrame}
-            capturedFrame={capturedFrame}
-            onClearFrame={handleClearFrame}
-            onDownloadFrame={handleDownloadFrame}
-          />
+      <main className="flex min-h-screen flex-col p-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2 space-y-4">
+            <VideoPlayer onCaptureFrame={(frameDataUrl) => setCapturedFrame(frameDataUrl)} />
+          </div>
+          
+          <div className="md:col-span-1">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Analysis Tools</h2>
+                <div className="flex space-x-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download All
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Download All Captures</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will download all captured frames as a zip file. 
+                          Depending on the number of captures, this may take a moment.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={downloadCapturesAsZip}>
+                          Download
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="flex items-center gap-1">
+                        <Trash2 className="h-4 w-4" />
+                        Clear All
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action will permanently delete all captured frames from the server.
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={clearCapturesFolder}>
+                          Yes, delete everything
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+              
+              <AnalysisPanel
+                onCaptureFrame={triggerCaptureFrame}
+                capturedFrame={capturedFrame}
+                onClearFrame={handleClearFrame}
+                onDownloadFrame={handleDownloadFrame}
+              />
+            </div>
+          </div>
         </div>
       </main>
     </ToastProvider>
