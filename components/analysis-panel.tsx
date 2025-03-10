@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Camera } from "lucide-react"
 import ButtonGrid from "./button-grid"
+import { cn } from "@/lib/utils"
 
 interface AnalysisPanelProps {
   onCaptureFrame: (camera: string, event: string, framing: string) => void
@@ -118,7 +119,12 @@ export default function AnalysisPanel({
               onClick={handleCaptureClick}
               variant="outline"
               size="sm"
-              className="flex items-center gap-1"
+              className={cn(
+                "flex items-center gap-1",
+                !selectedCamera || !selectedEvent || !selectedFraming
+                  ? ""
+                  : "bg-green-500 hover:bg-green-600 text-white"
+              )}
               disabled={!selectedCamera || !selectedEvent || !selectedFraming}
             >
               <Camera className="h-4 w-4 mr-1" />
