@@ -171,9 +171,43 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
     setNotes(updatedNotes);
   }
   
-  const addNewNote = () => {
-    setNotes([...notes, ""]);
-    setCurrentNoteIndex(notes.length);
+  const addNewNote = async () => {
+    // Get the current note (should be the last one in the array)
+    const currentNote = notes[notes.length - 1].trim();
+    
+    // Only proceed if there's content to save
+    if (currentNote) {
+      try {
+        // Save the current note immediately
+        const response = await fetch('/api/save-notes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ notes: currentNote }),
+        });
+        
+        if (response.ok) {
+          console.log("Note saved successfully");
+          
+          // Keep only the last 2 notes and add a new blank one
+          // This ensures we show at most 3 notes (2 previous + 1 blank)
+          const recentNotes = notes.slice(-2);
+          setNotes([...recentNotes, ""]);
+          setCurrentNoteIndex(recentNotes.length);
+        } else {
+          console.error("Failed to save note");
+        }
+      } catch (error) {
+        console.error("Error saving note:", error);
+      }
+    } else {
+      // If the current note is empty, just add another blank note
+      // But limit to showing only 3 notes total
+      const notesToKeep = notes.slice(-2);
+      setNotes([...notesToKeep, ""]);
+      setCurrentNoteIndex(notesToKeep.length);
+    }
   }
   
   const removeNote = (index: number) => {
@@ -206,9 +240,10 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
       });
       
       if (response.ok) {
-        // Clear the notes after successful save
-        setNotes([""]);
-        setCurrentNoteIndex(0);
+        // Keep only the last 2 notes and add a blank one
+        const recentNotes = notes.slice(-2);
+        setNotes([...recentNotes, ""]);
+        setCurrentNoteIndex(recentNotes.length);
         console.log("Notes saved successfully");
       } else {
         console.error("Failed to save notes");
@@ -231,6 +266,16 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
     return () => {
       document.removeEventListener('clearNotes', handleClearNotes);
     };
+  }, []);
+
+  // Add a new useEffect to limit notes on component mount
+  useEffect(() => {
+    // On component mount, ensure we only show up to 3 notes
+    if (notes.length > 3) {
+      const limitedNotes = notes.slice(-3);
+      setNotes(limitedNotes);
+      setCurrentNoteIndex(Math.min(currentNoteIndex, limitedNotes.length - 1));
+    }
   }, []);
 
   return (
@@ -372,19 +417,29 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
                       <div className="flex-grow">
                         <textarea
                           className="w-full min-h-[60px] p-2 bg-background border-0 focus:ring-0 resize-none"
-                          placeholder={`Note ${index + 1} (saved with capture)`}
+                          placeholder={index === notes.length - 1 ? "Add a new note..." : "Previous note"}
                           value={note}
                           onChange={(e) => handleNotesChange(e.target.value, index)}
+                          readOnly={index !== notes.length - 1} // Only the last note is editable
                         />
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                        onClick={() => removeNote(index)}
-                      >
-                        ×
-                      </Button>
+                      {index === notes.length - 1 ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                          onClick={() => {
+                            // Clear the current note without saving if it's empty
+                            if (!notes[index].trim()) {
+                              const updatedNotes = [...notes];
+                              updatedNotes[index] = "";
+                              setNotes(updatedNotes);
+                            }
+                          }}
+                        >
+                          ×
+                        </Button>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -395,7 +450,7 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
                     onClick={addNewNote}
                     className="text-xs"
                   >
-                    + Add Note
+                    Save & Add Note
                   </Button>
                 </div>
               </div>

@@ -25,3 +25,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#images and text files
+*.txt
+*.png
+*.jpg
+
