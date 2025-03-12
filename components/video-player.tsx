@@ -178,13 +178,19 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
     // Only proceed if there's content to save
     if (currentNote) {
       try {
-        // Save the current note immediately
+        // Get current video time
+        const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
+        
+        // Save the current note immediately with video time
         const response = await fetch('/api/save-notes', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ notes: currentNote }),
+          body: JSON.stringify({ 
+            notes: currentNote,
+            videoTime: currentVideoTime 
+          }),
         });
         
         if (response.ok) {
@@ -277,6 +283,19 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
       setCurrentNoteIndex(Math.min(currentNoteIndex, limitedNotes.length - 1));
     }
   }, []);
+
+  // Add this function to download the SRT file
+  const downloadSrtFile = () => {
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = '/captures/notes.srt';
+    link.download = 'notes.srt';
+    
+    // Append to the document, click it, and remove it
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <>
@@ -443,7 +462,15 @@ export default function VideoPlayer({ onCaptureFrame }: VideoPlayerProps) {
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-end mt-2 space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={downloadSrtFile}
+                    className="text-xs"
+                  >
+                    Download SRT
+                  </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 

@@ -138,13 +138,19 @@ export default function Home() {
       // Save notes if there are any
       if (notesArray.length > 0) {
         console.log("Saving notes:", notesArray); // Debug log
+        const videoPlayer = document.querySelector("video")
+        const currentVideoTime = videoPlayer ? videoPlayer.currentTime : 0
+
         try {
           const response = await fetch('/api/save-notes', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ notes: notesArray.join('\n') }),
+            body: JSON.stringify({ 
+              notes: notesArray.join('\n'),
+              videoTime: currentVideoTime 
+            }),
           });
           
           const result = await response.json();
